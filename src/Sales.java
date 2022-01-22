@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 public class Sales {
     private String username;        // Username of user who is selling the object
     private String name;
@@ -50,5 +52,29 @@ public class Sales {
 
     public SaleType getType() {
         return type;
+    }
+
+    public String toString() {
+        String result = String.format("Item: %s   Price: %f   Number in Stock: %d", name, price, stock);
+        switch (type) {
+            case CROP:
+                result += "   Type: Crop";
+            case LAND:
+                result += "   Type: Land";
+            case TOOL:
+                result += "   Type: Tool";
+            case LIVESTOCK:
+                result += "   Type: Livestock";
+        }
+        return result;
+    }
+
+    public void buyItem(int amountBought) {
+        if (amountBought > stock) {
+            JOptionPane.showMessageDialog(null, "The amount you want to buy is greater than " +
+                    "the stock of the item", "Not Enough Stock", JOptionPane.ERROR_MESSAGE);
+        } else {
+            stock -= amountBought;
+        }
     }
 }
