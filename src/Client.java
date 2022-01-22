@@ -5,7 +5,7 @@ import java.net.*;
 public class Client {
     public static void main(String[] args) {
         try {
-            Socket socket = new Socket("localhost", 4567);
+            Socket socket = new Socket("localhost", 1234);
 
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -34,17 +34,24 @@ public class Client {
                             "your account", "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
 
                     // Send to Server
-                    pw.println("createAccount");
+                    pw.write("createAccount");
+                    pw.println();
                     pw.flush();
-                    pw.println(name);
-                    pw.println(username);
-                    pw.println(password);
+                    pw.write(name);
+                    pw.println();
+                    pw.write(username);
+                    pw.println();
+                    pw.write(password);
+                    pw.println();
                     pw.flush();
 
                     // Receive From Server
                     String message = br.readLine();
                     if (message.equals("accountMade")) {
                         user = (Farmer) ois.readObject();
+                        System.out.println("Object Received");
+                        JOptionPane.showMessageDialog(null, "Successfully Logged In",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
                         break;
                     } else {
                         JOptionPane.showMessageDialog(null, "This username is already " +
@@ -57,15 +64,21 @@ public class Client {
                             "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
                     // Send to server
                     pw.write("login");
+                    pw.println();
                     pw.flush();
                     pw.write(username);
+                    pw.println();
                     pw.write(password);
+                    pw.println();
                     pw.flush();
 
                     // Receive From Server
                     String message = br.readLine();
+                    System.out.println("Message received");
                     if (message.equals("loggedIn")) {
                         user = (Farmer) ois.readObject();
+                        JOptionPane.showMessageDialog(null, "Successfully Logged In",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
                         break;
                     } else {
                         JOptionPane.showMessageDialog(null, "An account with the given " +

@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.io.Serializable;
 
 public class Sales implements Serializable {
