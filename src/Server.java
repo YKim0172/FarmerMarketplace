@@ -6,7 +6,21 @@ import java.util.ArrayList;
 
 public class Server {
     public static void main(String[] args) throws IOException {
-        ServerSocket ss = new ServerSocket(4567);
+        System.out.println(InetAddress.getLocalHost());
+        ServerSocket ss = new ServerSocket(1234);
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Farmers.txt"))) {
+        } catch (Exception a) {
+            ArrayList<Farmer> farmerArrayList = new ArrayList<>();
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Farmers.txt"))) {
+                oos.writeObject(farmerArrayList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
 
         /*
          * Creates the PurchaseHistory.txt file and stores the ArrayList of Purchase objects if
@@ -44,6 +58,7 @@ public class Server {
 
 
         while (true) {
+            System.out.println("accepting input");
             Socket socket = ss.accept();
             SecondaryServer server = new SecondaryServer(socket);
             new Thread(server).start();
