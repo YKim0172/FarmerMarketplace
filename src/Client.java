@@ -90,8 +90,7 @@ public class Client {
                 }
             }
             if (selection == 0 || selection == 1) {
-                // TODO Run GUI
-                SwingUtilities.invokeLater(new FarmerGUI(user));
+                SwingUtilities.invokeLater(new FarmerGUI(user, oos, ois, pw, br));
             } else {
                 JOptionPane.showMessageDialog(null, "Program is now terminating. " +
                                 "Thank you for using Farmer Marketplace.",

@@ -1,10 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Queue;
+import java.io.*;
+import java.util.ArrayList;
 
 public class FarmerGUI implements Runnable{
     Farmer user;
+    ObjectOutputStream oos;
+    ObjectInputStream ois;
+    PrintWriter pw;
+    BufferedReader br;
 
     JLabel dash = new JLabel("-");
     JFrame mainMenu;
@@ -45,8 +50,13 @@ public class FarmerGUI implements Runnable{
         return item.toString() + "\n" + item.getDescription()
                 + "\nSeller: " + item.getUsername() + "\n";
     }
-    public FarmerGUI(Farmer user) {
+
+    public FarmerGUI(Farmer user, ObjectOutputStream oos, ObjectInputStream ois, PrintWriter pw, BufferedReader br) {
         this.user = user;
+        this.oos = oos;
+        this.ois = ois;
+        this.pw = pw;
+        this.br = br;
     }
 
     public void run() {
@@ -165,19 +175,32 @@ public class FarmerGUI implements Runnable{
                             }
                         }
                         SaleType saleTypeFilter = (SaleType) types.getSelectedItem();
-                        // TODO Communicate w/ server to get sales list
+
+                        pw.write("requestSalesList");
+                        pw.println();
+                        pw.flush();
+
+                        ArrayList<Sales> itemsList;
+                        try {
+                            itemsList = (ArrayList<Sales>) ois.readObject();
+                        } catch (IOException | ClassNotFoundException ex) {
+                            JOptionPane.showMessageDialog(salesFilters, "There was an issue connecting with" +
+                                    "the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
                         items = new JComboBox<>();
                         items.setMaximumRowCount(15);
                         boolean foundMatch = false;
-                        /* for (int i = 0; i < list.size(); i++)
-                            if (get(i).price() >= lowRange && get(i).price() <= highRange) {
-                                if (saleTypeFilter == null || get(i).type == saleTypeFilter) {
-                                    items.addItem(get(i));
+                        for (Sales sales : itemsList) {
+                            if (sales.getPrice() >= lowRange && sales.getPrice() <= highRange) {
+                                if (saleTypeFilter == null || sales.getType() == saleTypeFilter) {
+                                    items.addItem(sales);
                                     foundMatch = true;
                                 }
                             }
                         }
-                         */
+
                         if (!foundMatch) {
                             JOptionPane.showMessageDialog(salesFilters, "No listed items match your filters",
                                     "No Items Found", JOptionPane.ERROR_MESSAGE);
@@ -293,14 +316,26 @@ public class FarmerGUI implements Runnable{
                         String newName = name.getText();
                         String newDescription = description.getText();
                         SaleType newType = (SaleType) types.getSelectedItem();
+                        Sales item;
                         try {
-                            Sales item = new Sales(user.getUsername(), newName, newPrice, newDescription, newType);
+                            item = new Sales(user.getUsername(), newName, newPrice, newDescription, newType);
                         } catch (IllegalArgumentException ex) {
                             JOptionPane.showMessageDialog(listForPurchase, ex.getMessage(),
                                     "Invalid Input", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                        // TODO Server interaction w/ item
+                        pw.write("postingSellOffer");
+                        pw.println();
+                        pw.flush();
+
+                        try {
+                            oos.writeObject(item);
+                            oos.flush();
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(null, "There was an issue communicating" +
+                                    "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
                         JOptionPane.showMessageDialog(listForPurchase, "Item successfully listed",
                                 "Success!", JOptionPane.INFORMATION_MESSAGE);
                         listForPurchase.dispose();
@@ -429,7 +464,7 @@ public class FarmerGUI implements Runnable{
     }
 
     public static void main(String[] args) {
-        FarmerGUI f = new FarmerGUI(new Farmer("h", "h", "h"));
-        SwingUtilities.invokeLater(f);
+        //FarmerGUI f = new FarmerGUI(new Farmer("h", "h", "h"));
+        //SwingUtilities.invokeLater(f);
     }
 }
