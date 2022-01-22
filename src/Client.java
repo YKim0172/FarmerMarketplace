@@ -1,39 +1,95 @@
 import javax.swing.*;
+import java.io.*;
+import java.net.*;
 
 public class Client {
     public static void main(String[] args) {
-        // Logging in
-        String[] loginOptions = {"Create Account", "Login to Existing Account", "Terminate Program"};
-        int selection = JOptionPane.showOptionDialog(null, "Welcome! Please select one of " +
-                        "the following options", "Farmer Marketplace", JOptionPane.DEFAULT_OPTION,
-                JOptionPane.INFORMATION_MESSAGE, null, loginOptions, null);
-        String username;
-        String password;
-        Farmer user = null;
-        if (selection == 0) {
-            String name = JOptionPane.showInputDialog(null, "Please enter your name",
-                    "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
-            username = JOptionPane.showInputDialog(null, "Please enter your desired " +
-                    "username", "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
-            password = JOptionPane.showInputDialog(null, "Please enter a password for " +
-                    "your account", "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
-            // TODO Communicate w/ server
-            // user = ??;
-        } else if (selection == 1) {
-            username = JOptionPane.showInputDialog(null, "Please enter your username",
-                    "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
-            password = JOptionPane.showInputDialog(null, "Please enter your password",
-                    "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
-            // TODO Communicate w/ server
-            // user = ??;
-        }
-        if (selection == 0 || selection == 1) {
-            // TODO Run GUI
-            SwingUtilities.invokeLater(new FarmerGUI(user));
-        } else {
-            JOptionPane.showMessageDialog(null, "Program is now terminating. " +
-                            "Thank you for using Farmer Marketplace.",
-                    "Farmer Marketplace", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            Socket socket = new Socket("localhost", 4567);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+            Thread.sleep(500);
+
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            Thread.sleep(500);
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+
+            // Logging in
+            String[] loginOptions = {"Create Account", "Login to Existing Account", "Terminate Program"};
+            int selection;
+            Farmer user = null;
+            while (true) {
+                selection = JOptionPane.showOptionDialog(null, "Welcome! Please select one of " +
+                                "the following options", "Farmer Marketplace", JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE, null, loginOptions, null);
+                String username;
+                String password;
+                if (selection == 0) {
+                    String name = JOptionPane.showInputDialog(null, "Please enter your name",
+                            "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
+                    username = JOptionPane.showInputDialog(null, "Please enter your desired " +
+                            "username", "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
+                    password = JOptionPane.showInputDialog(null, "Please enter a password for " +
+                            "your account", "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
+
+                    // Send to Server
+                    pw.println("createAccount");
+                    pw.flush();
+                    pw.println(name);
+                    pw.println(username);
+                    pw.println(password);
+                    pw.flush();
+
+                    // Receive From Server
+                    String message = br.readLine();
+                    if (message.equals("accountMade")) {
+                        user = (Farmer) ois.readObject();
+                        break;
+                    } else {
+                        JOptionPane.showMessageDialog(null, "This username is already " +
+                                "in use. Please try again", "Create Account", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else if (selection == 1) {
+                    username = JOptionPane.showInputDialog(null, "Please enter your username",
+                            "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
+                    password = JOptionPane.showInputDialog(null, "Please enter your password",
+                            "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
+                    // Send to server
+                    pw.write("login");
+                    pw.flush();
+                    pw.write(username);
+                    pw.write(password);
+                    pw.flush();
+
+                    // Receive From Server
+                    String message = br.readLine();
+                    if (message.equals("loggedIn")) {
+                        user = (Farmer) ois.readObject();
+                        break;
+                    } else {
+                        JOptionPane.showMessageDialog(null, "An account with the given " +
+                                "credentials was not found.\nPlease try again.", "Login",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    break;
+                }
+            }
+            if (selection == 0 || selection == 1) {
+                // TODO Run GUI
+                SwingUtilities.invokeLater(new FarmerGUI(user));
+            } else {
+                JOptionPane.showMessageDialog(null, "Program is now terminating. " +
+                                "Thank you for using Farmer Marketplace.",
+                        "Farmer Marketplace", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (IOException | InterruptedException e) {
+            JOptionPane.showMessageDialog(null, "There was an issue connecting to the server",
+                    "Connection Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

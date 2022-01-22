@@ -25,7 +25,7 @@ public class SecondaryServer implements Runnable {
          * We made the socket object so the client is connected to the server
          */
         this.socket = socket;
-        if (allUsers.size() == 0) {
+        if (allUsers == null) {
             allUsers = new ArrayList<>();
         }
         allUsers.add(this.socket);
@@ -33,12 +33,14 @@ public class SecondaryServer implements Runnable {
         try {
             this.bfr = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.pw = new PrintWriter(socket.getOutputStream());
+            Thread.sleep(500);
 
-            this.ois = new ObjectInputStream(socket.getInputStream());
             this.oos = new ObjectOutputStream(socket.getOutputStream());
+            Thread.sleep(500);
+            this.ois = new ObjectInputStream(socket.getInputStream());
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
     }
