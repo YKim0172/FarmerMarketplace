@@ -27,7 +27,7 @@ public class Server {
 
         /*
          * Creates the SellingHistory.txt file and stores the ArrayList of Selling objects if
-         * the text file asn't already created.
+         * the text file isn't already created.
          *
          * By storing Selling objects in the file, we can ensure all data is saved regarding farmers'
          * selling history
