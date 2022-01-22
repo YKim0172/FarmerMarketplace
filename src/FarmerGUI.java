@@ -98,8 +98,15 @@ public class FarmerGUI implements Runnable{
                 Container filtersContent = salesFilters.getContentPane();
                 filtersContent.setLayout(new BoxLayout(filtersContent, BoxLayout.Y_AXIS));
                 salesFilters.setSize(400, 200);
-                salesFilters.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+                salesFilters.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 salesFilters.setLocationRelativeTo(mainContent);
+
+                salesFilters.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        mainMenu.setVisible(true);
+                    }
+                });
 
                 JPanel price = new JPanel();
                 JPanel typePanel = new JPanel();
@@ -158,15 +165,7 @@ public class FarmerGUI implements Runnable{
                             }
                         }
                         SaleType saleTypeFilter = (SaleType) types.getSelectedItem();
-                        salesFilters.dispose();
                         // TODO Communicate w/ server to get sales list
-                        salesBrowsing = new JFrame("Items for Sale");
-                        salesBrowsing.setSize(500, 200);
-                        salesBrowsing.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                        salesBrowsing.setLocationRelativeTo(mainContent);
-                        Container salesBrowsingContent = salesBrowsing.getContentPane();
-                        salesBrowsingContent.setLayout(new BoxLayout(salesBrowsingContent, BoxLayout.Y_AXIS));
-                        JPanel itemsPanel = new JPanel();
                         items = new JComboBox<>();
                         items.setMaximumRowCount(15);
                         boolean foundMatch = false;
@@ -182,10 +181,22 @@ public class FarmerGUI implements Runnable{
                         if (!foundMatch) {
                             JOptionPane.showMessageDialog(salesFilters, "No listed items match your filters",
                                     "No Items Found", JOptionPane.ERROR_MESSAGE);
+                            return;
                         }
+                        salesFilters.dispose();
+                        salesBrowsing = new JFrame("Items for Sale");
+                        salesBrowsing.setSize(500, 200);
+                        salesBrowsing.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                        salesBrowsing.setLocationRelativeTo(mainContent);
+                        Container salesBrowsingContent = salesBrowsing.getContentPane();
+                        salesBrowsingContent.setLayout(new BoxLayout(salesBrowsingContent, BoxLayout.Y_AXIS));
+
+                        JPanel itemsPanel = new JPanel();
                         itemsPanel.add(items);
                         salesBrowsingContent.add(itemsPanel);
+
                         salesBrowsing.setVisible(true);
+
                         items.addItemListener(new ItemListener() {
                             @Override
                             public void itemStateChanged(ItemEvent e) {
@@ -302,6 +313,8 @@ public class FarmerGUI implements Runnable{
         removeItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                mainMenu.setVisible(false);
+
                 removeItems = new JFrame("Remove Listed Item");
                 removeItems.setSize(400, 400);
                 removeItems.setLocationRelativeTo(mainContent);
