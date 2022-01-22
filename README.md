@@ -2,7 +2,7 @@
 Project for BoilerMake IX Hackathon 2022
 Created by: Yu Hyun Kim (From Purdue University West Lafayette) and Will Irvin (From Purdue University West Lafayette)
 
-#Who are we?
+# Who are we?
 Hello! We are Yu Hyun Kim and Will Irvin, first-year Computer Science majors attending Purdue University West Lafayette. We have developed our project "Farmer's Marketplace" in response to John Deere's "Best Agricultural Innovation" challenge.
 
 # What Does Farmer's Marketplace do?
