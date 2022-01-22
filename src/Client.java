@@ -9,6 +9,7 @@ public class Client {
                 JOptionPane.INFORMATION_MESSAGE, null, loginOptions, null);
         String username;
         String password;
+        Farmer user = null;
         if (selection == 0) {
             String name = JOptionPane.showInputDialog(null, "Please enter your name",
                     "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
@@ -17,15 +18,18 @@ public class Client {
             password = JOptionPane.showInputDialog(null, "Please enter a password for " +
                     "your account", "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
             // TODO Communicate w/ server
+            // user = ??;
         } else if (selection == 1) {
             username = JOptionPane.showInputDialog(null, "Please enter your username",
                     "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
             password = JOptionPane.showInputDialog(null, "Please enter your password",
                     "Farmer Marketplace", JOptionPane.QUESTION_MESSAGE);
             // TODO Communicate w/ server
+            // user = ??;
         }
         if (selection == 0 || selection == 1) {
             // TODO Run GUI
+            SwingUtilities.invokeLater(new FarmerGUI(user));
         } else {
             JOptionPane.showMessageDialog(null, "Program is now terminating. " +
                             "Thank you for using Farmer Marketplace.",

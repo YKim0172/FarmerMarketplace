@@ -1,6 +1,7 @@
 import javax.swing.*;
+import java.io.Serializable;
 
-public class Sales {
+public class Sales implements Serializable {
     private String username;        // Username of user who is selling the object
     private String name;
     private double price;

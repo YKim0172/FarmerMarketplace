@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Queue;
 
 public class FarmerGUI implements Runnable{
     Farmer user;
@@ -30,6 +31,20 @@ public class FarmerGUI implements Runnable{
     JTextField price;
     JButton listItemForSale;
 
+    JFrame removeItems;
+    JComboBox<Sales> accountItems;
+
+    JFrame purchaseHistory;
+    JLabel purchaseHistoryList;
+
+    JFrame salesHistory;
+    JLabel salesHistoryList;
+
+    // Formatted string w/ description and other additional information
+    public String detailedSalesInformation(Sales item) {
+        return item.toString() + "\n" + item.getDescription()
+                + "\nSeller: " + item.getUsername() + "\n";
+    }
     public FarmerGUI(Farmer user) {
         this.user = user;
     }
@@ -154,14 +169,20 @@ public class FarmerGUI implements Runnable{
                         JPanel itemsPanel = new JPanel();
                         items = new JComboBox<>();
                         items.setMaximumRowCount(15);
+                        boolean foundMatch = false;
                         /* for (int i = 0; i < list.size(); i++)
                             if (get(i).price() >= lowRange && get(i).price() <= highRange) {
                                 if (saleTypeFilter == null || get(i).type == saleTypeFilter) {
                                     items.addItem(get(i));
+                                    foundMatch = true;
                                 }
                             }
                         }
                          */
+                        if (!foundMatch) {
+                            JOptionPane.showMessageDialog(salesFilters, "No listed items match your filters",
+                                    "No Items Found", JOptionPane.ERROR_MESSAGE);
+                        }
                         itemsPanel.add(items);
                         salesBrowsingContent.add(itemsPanel);
                         salesBrowsing.setVisible(true);
@@ -169,8 +190,7 @@ public class FarmerGUI implements Runnable{
                             @Override
                             public void itemStateChanged(ItemEvent e) {
                                 Sales selection = (Sales) items.getSelectedItem();
-                                String selectionInfo = selection.toString() + "\n" + selection.getDescription()
-                                        + "\nSeller: " + selection.getUsername() + "\n";
+                                String selectionInfo = detailedSalesInformation(selection);
                                 selectionInfo += "Would you like to purchase this item?";
                                 int choice = JOptionPane.showConfirmDialog(salesBrowsingContent, selectionInfo,
                                         "Purchase", JOptionPane.YES_NO_OPTION);
@@ -272,6 +292,115 @@ public class FarmerGUI implements Runnable{
                         // TODO Server interaction w/ item
                         JOptionPane.showMessageDialog(listForPurchase, "Item successfully listed",
                                 "Success!", JOptionPane.INFORMATION_MESSAGE);
+                        listForPurchase.dispose();
+                    }
+                });
+            }
+        });
+
+        // Remove Selected Item
+        removeItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeItems = new JFrame("Remove Listed Item");
+                removeItems.setSize(400, 400);
+                removeItems.setLocationRelativeTo(mainContent);
+                removeItems.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                Container removeItemsContent = removeItems.getContentPane();
+                removeItemsContent.setLayout(new BoxLayout(removeItemsContent, BoxLayout.Y_AXIS));
+
+                JPanel items = new JPanel();
+                accountItems = new JComboBox<>();
+                accountItems.setMaximumRowCount(15);
+                // TODO Communicate w/ server, loop to add to combobox
+                items.add(accountItems);
+                removeItemsContent.add(items);
+                removeItems.setVisible(true);
+
+                accountItems.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                        Sales selection = (Sales) accountItems.getSelectedItem();
+                        String selectioninfo = detailedSalesInformation(selection);
+                        selectioninfo += "Are you sure you would like to remove this item from the shopping list?";
+                        int choice = JOptionPane.showConfirmDialog(removeItemsContent, selectioninfo, "Remove Item",
+                                JOptionPane.YES_NO_OPTION);
+                        if (choice == JOptionPane.YES_OPTION) {
+                            // TODO Server Interaction
+                            JOptionPane.showMessageDialog(removeItemsContent, "Item has successfully " +
+                                    "been removed", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            removeItems.dispose();
+                        }
+                    }
+                });
+                removeItems.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        mainMenu.setVisible(true);
+                    }
+                });
+            }
+        });
+
+        // Purchase History
+        viewPurchaseHistory.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainMenu.setVisible(false);
+
+                purchaseHistory = new JFrame(user.getUsername() + ": Purchase History");
+                Container purchaseHistoryContent = purchaseHistory.getContentPane();
+                purchaseHistory.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                purchaseHistory.setLocationRelativeTo(mainContent);
+                purchaseHistoryContent.setLayout(new BoxLayout(purchaseHistoryContent, BoxLayout.Y_AXIS));
+
+                JPanel purchaseHistoryPanel = new JPanel();
+                String history = "<html>";
+                // TODO Communicate w/ server, loop to get all info
+                history += "</html>";
+                purchaseHistoryList = new JLabel(history);
+                purchaseHistoryPanel.add(purchaseHistoryList);
+                purchaseHistoryContent.add(purchaseHistoryPanel);
+
+                purchaseHistory.pack();
+                purchaseHistory.setVisible(true);
+
+                purchaseHistory.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        mainMenu.setVisible(true);
+                    }
+                });
+            }
+        });
+
+        // Selling History
+        viewSalesHistory.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainMenu.setVisible(false);
+
+                salesHistory = new JFrame(user.getUsername() + ": Purchase History");
+                Container salesHistoryContent = salesHistory.getContentPane();
+                salesHistory.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                salesHistory.setLocationRelativeTo(mainContent);
+                salesHistoryContent.setLayout(new BoxLayout(salesHistoryContent, BoxLayout.Y_AXIS));
+
+                JPanel salesHistoryPanel = new JPanel();
+                String history = "<html>";
+                // TODO Communicate w/ server, loop to get all info
+                history += "</html>";
+                salesHistoryList = new JLabel(history);
+                salesHistoryPanel.add(purchaseHistoryList);
+                salesHistoryContent.add(salesHistoryPanel);
+
+                salesHistory.pack();
+                salesHistory.setVisible(true);
+
+                salesHistory.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        mainMenu.setVisible(true);
                     }
                 });
             }
