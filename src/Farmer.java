@@ -1,4 +1,6 @@
-public class Farmer {
+import java.io.*;
+
+public class Farmer implements Serializable {
     private String name;  //name of farmer
     private String username;  //username of farmer
     private String password;  //password of farmer
