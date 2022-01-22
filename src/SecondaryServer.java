@@ -33,10 +33,10 @@ public class SecondaryServer implements Runnable {
         try {
             this.bfr = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.pw = new PrintWriter(socket.getOutputStream());
-            Thread.sleep(500);
+            //Thread.sleep(500);
 
             this.oos = new ObjectOutputStream(socket.getOutputStream());
-            Thread.sleep(500);
+            //Thread.sleep(500);
             this.ois = new ObjectInputStream(socket.getInputStream());
 
         } catch (Exception e) {
@@ -50,14 +50,16 @@ public class SecondaryServer implements Runnable {
             try {
                 String action = bfr.readLine();
 
-                if(action.equals("createAccount")) {
+                if (action.equals("createAccount")) {
                     String name = bfr.readLine();
                     String username = bfr.readLine();
                     String password = bfr.readLine();
 
                     if (accountValid(username)) {  //make account
                         Farmer newFarmer = new Farmer(name, username, password);  //make new farmer object
-                        updateFarmerList(newFarmer);
+                        ArrayList<Farmer> farmerList = getFarmerList();
+                        farmerList.add(newFarmer);
+                        updateFarmerList(farmerList);
 
                         pw.write("accountMade");
                         pw.println();
@@ -105,9 +107,9 @@ public class SecondaryServer implements Runnable {
         }
     }
 
-    public static void updateFarmerList(Farmer farmer) {
+    public static void updateFarmerList(ArrayList<Farmer> farmerList) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Farmers.txt"))) {
-            oos.writeObject(getFarmerList().add(farmer));
+            oos.writeObject(farmerList);
         } catch (Exception e) {
 
         }
