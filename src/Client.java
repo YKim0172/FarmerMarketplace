@@ -47,9 +47,9 @@ public class Client {
 
                     // Receive From Server
                     String message = br.readLine();
+                    System.out.println(message);
                     if (message.equals("accountMade")) {
-                        user = (Farmer) ois.readObject();
-                        System.out.println("Object Received");
+                        user = new Farmer(name, username, password);
                         JOptionPane.showMessageDialog(null, "Successfully Logged In",
                                 "Success", JOptionPane.INFORMATION_MESSAGE);
                         break;

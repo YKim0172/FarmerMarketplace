@@ -64,9 +64,6 @@ public class SecondaryServer implements Runnable {
                         pw.write("accountMade");
                         pw.println();
                         pw.flush();
-
-                        oos.writeObject(newFarmer);
-                        oos.flush();
                     } else {  //username already taken
                         pw.write("accountNotMade");
                         pw.println();
