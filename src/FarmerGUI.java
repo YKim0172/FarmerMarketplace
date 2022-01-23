@@ -24,7 +24,8 @@ public class FarmerGUI implements Runnable{
     JTextField priceLow;
     JTextField priceHigh;
     JLabel type;
-    JComboBox<SaleType> types;
+    JComboBox<SaleType> types1;
+    JComboBox<SaleType> types2;
     JButton confirmFilters;
 
     JFrame salesBrowsing;
@@ -60,12 +61,19 @@ public class FarmerGUI implements Runnable{
     }
 
     public void run() {
-        types = new JComboBox<>();
-        types.addItem(null);
-        types.addItem(SaleType.CROP);
-        types.addItem(SaleType.LAND);
-        types.addItem(SaleType.TOOL);
-        types.addItem(SaleType.LIVESTOCK);
+        types1 = new JComboBox<>();
+        types1.addItem(null);
+        types1.addItem(SaleType.CROP);
+        types1.addItem(SaleType.LAND);
+        types1.addItem(SaleType.TOOL);
+        types1.addItem(SaleType.LIVESTOCK);
+
+        types2 = new JComboBox<>();
+        types2.addItem(null);
+        types2.addItem(SaleType.CROP);
+        types2.addItem(SaleType.LAND);
+        types2.addItem(SaleType.TOOL);
+        types2.addItem(SaleType.LIVESTOCK);
 
         mainMenu = new JFrame(user.getName() + ": Main Menu");
         Container mainContent = mainMenu.getContentPane();
@@ -108,15 +116,8 @@ public class FarmerGUI implements Runnable{
                 Container filtersContent = salesFilters.getContentPane();
                 filtersContent.setLayout(new BoxLayout(filtersContent, BoxLayout.Y_AXIS));
                 salesFilters.setSize(400, 200);
-                salesFilters.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                salesFilters.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
                 salesFilters.setLocationRelativeTo(mainContent);
-
-                salesFilters.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        mainMenu.setVisible(true);
-                    }
-                });
 
                 JPanel price = new JPanel();
                 JPanel typePanel = new JPanel();
@@ -132,14 +133,24 @@ public class FarmerGUI implements Runnable{
 
                 type = new JLabel("Select the sale type you would like to view");
                 typePanel.add(type);
-                typePanel.add(types);
+                typePanel.add(types1);
                 filtersContent.add(typePanel);
 
                 JPanel confirmFiltersPanel = new JPanel();
                 confirmFilters = new JButton("Select Filters");
+                JButton returnToMenu = new JButton("Return to Main Menu");
                 confirmFiltersPanel.add(confirmFilters);
+                confirmFiltersPanel.add(returnToMenu);
                 filtersContent.add(confirmFiltersPanel);
                 salesFilters.setVisible(true);
+
+                returnToMenu.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        salesFilters.dispose();
+                        mainMenu.setVisible(true);
+                    }
+                });
 
                 confirmFilters.addActionListener(new ActionListener() {
                     @Override
@@ -174,7 +185,7 @@ public class FarmerGUI implements Runnable{
                                 return;
                             }
                         }
-                        SaleType saleTypeFilter = (SaleType) types.getSelectedItem();
+                        SaleType saleTypeFilter = (SaleType) types1.getSelectedItem();
 
                         pw.write("requestSalesList");
                         pw.println();
@@ -191,6 +202,7 @@ public class FarmerGUI implements Runnable{
 
                         items = new JComboBox<>();
                         items.setMaximumRowCount(15);
+                        items.addItem(null);
                         boolean foundMatch = false;
                         for (Sales sales : itemsList) {
                             if (sales.getPrice() >= lowRange && sales.getPrice() <= highRange) {
@@ -219,22 +231,23 @@ public class FarmerGUI implements Runnable{
                         salesBrowsingContent.add(itemsPanel);
 
                         salesBrowsing.setVisible(true);
-                        mainMenu.setVisible(false);
 
                         items.addItemListener(new ItemListener() {
                             @Override
                             public void itemStateChanged(ItemEvent e) {
-                                Sales selection = (Sales) items.getSelectedItem();
-                                String selectionInfo = detailedSalesInformation(selection);
-                                selectionInfo += "Would you like to purchase this item?";
-                                int choice = JOptionPane.showConfirmDialog(salesBrowsingContent, selectionInfo,
-                                        "Purchase", JOptionPane.YES_NO_OPTION);
-                                if (choice == JOptionPane.YES_OPTION) {
-                                    // TODO Server Interaction
-                                    JOptionPane.showMessageDialog(mainMenu, "Purchase successful! " +
-                                                    "Returning to main menu...", "Purchase",
-                                            JOptionPane.INFORMATION_MESSAGE);
-                                    salesBrowsing.dispose();
+                                if (e.getStateChange() == ItemEvent.SELECTED){
+                                    Sales selection = (Sales) items.getSelectedItem();
+                                    String selectionInfo = detailedSalesInformation(selection);
+                                    selectionInfo += "Would you like to purchase this item?";
+                                    int choice = JOptionPane.showConfirmDialog(salesBrowsingContent, selectionInfo,
+                                            "Purchase", JOptionPane.YES_NO_OPTION);
+                                    if (choice == JOptionPane.YES_OPTION) {
+                                        // TODO Server Interaction
+                                        JOptionPane.showMessageDialog(mainMenu, "Purchase successful! " +
+                                                        "Returning to main menu...", "Purchase",
+                                                JOptionPane.INFORMATION_MESSAGE);
+                                        salesBrowsing.dispose();
+                                    }
                                 }
                             }
                         });
@@ -286,7 +299,7 @@ public class FarmerGUI implements Runnable{
                 JPanel typePanel = new JPanel();
                 JLabel typeLabel = new JLabel("If applicable, select the appropriate type of your item:");
                 typePanel.add(typeLabel);
-                typePanel.add(types);
+                typePanel.add(types2);
                 purchaseContent.add(typePanel);
 
                 JPanel buttonPanel = new JPanel();
@@ -316,7 +329,7 @@ public class FarmerGUI implements Runnable{
                         }
                         String newName = name.getText();
                         String newDescription = description.getText();
-                        SaleType newType = (SaleType) types.getSelectedItem();
+                        SaleType newType = (SaleType) types2.getSelectedItem();
                         Sales item;
                         try {
                             item = new Sales(user.getUsername(), newName, newPrice, newDescription, newType);
@@ -361,6 +374,7 @@ public class FarmerGUI implements Runnable{
                 JPanel items = new JPanel();
                 accountItems = new JComboBox<>();
                 accountItems.setMaximumRowCount(15);
+                accountItems.addItem(null);
 
                 pw.write("requestUserSalesList");
                 pw.println();
@@ -388,26 +402,28 @@ public class FarmerGUI implements Runnable{
                 accountItems.addItemListener(new ItemListener() {
                     @Override
                     public void itemStateChanged(ItemEvent e) {
-                        Sales selection = (Sales) accountItems.getSelectedItem();
-                        String selectioninfo = detailedSalesInformation(selection);
-                        selectioninfo += "Are you sure you would like to remove this item from the shopping list?";
-                        int choice = JOptionPane.showConfirmDialog(removeItemsContent, selectioninfo, "Remove Item",
-                                JOptionPane.YES_NO_OPTION);
-                        if (choice == JOptionPane.YES_OPTION) {
-                            pw.write("removeSale");
-                            pw.println();
-                            pw.flush();
+                        if (e.getStateChange() == ItemEvent.SELECTED) {
+                            Sales selection = (Sales) accountItems.getSelectedItem();
+                            String selectioninfo = detailedSalesInformation(selection);
+                            selectioninfo += "Are you sure you would like to remove this item from the shopping list?";
+                            int choice = JOptionPane.showConfirmDialog(removeItemsContent, selectioninfo, "Remove Item",
+                                    JOptionPane.YES_NO_OPTION);
+                            if (choice == JOptionPane.YES_OPTION) {
+                                pw.write("removeSale");
+                                pw.println();
+                                pw.flush();
 
-                            try {
-                                oos.writeObject(selection);
-                            } catch (IOException ex) {
-                                JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
-                                        "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
-                                return;
+                                try {
+                                    oos.writeObject(selection);
+                                } catch (IOException ex) {
+                                    JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
+                                            "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                                    return;
+                                }
+                                JOptionPane.showMessageDialog(removeItemsContent, "Item has successfully " +
+                                        "been removed", "Success", JOptionPane.INFORMATION_MESSAGE);
+                                removeItems.dispose();
                             }
-                            JOptionPane.showMessageDialog(removeItemsContent, "Item has successfully " +
-                                    "been removed", "Success", JOptionPane.INFORMATION_MESSAGE);
-                            removeItems.dispose();
                         }
                     }
                 });

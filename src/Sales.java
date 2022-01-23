@@ -47,19 +47,21 @@ public class Sales implements Serializable {
 
     public String toString() {
         String result = String.format("Item: %s   Price: %.2f", name, price);
-        switch (type) {
-            case CROP:
-                result += "   Type: Crop";
-                break;
-            case LAND:
-                result += "   Type: Land";
-                break;
-            case TOOL:
-                result += "   Type: Tool";
-                break;
-            case LIVESTOCK:
-                result += "   Type: Livestock";
-                break;
+        if (type != null) {
+            switch (type) {
+                case CROP:
+                    result += "   Type: Crop";
+                    break;
+                case LAND:
+                    result += "   Type: Land";
+                    break;
+                case TOOL:
+                    result += "   Type: Tool";
+                    break;
+                case LIVESTOCK:
+                    result += "   Type: Livestock";
+                    break;
+            }
         }
         return result;
     }
