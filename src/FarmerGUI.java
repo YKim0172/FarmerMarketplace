@@ -17,8 +17,6 @@ public class FarmerGUI implements Runnable{
     JButton purchaseItem;
     JButton listItem;
     JButton removeItem;
-    JButton viewPurchaseHistory;
-    JButton viewSalesHistory;
 
     JFrame salesFilters;
     JTextField priceLow;
@@ -39,12 +37,6 @@ public class FarmerGUI implements Runnable{
 
     JFrame removeItems;
     JComboBox<Sales> accountItems;
-
-    JFrame purchaseHistory;
-    JLabel purchaseHistoryList;
-
-    JFrame salesHistory;
-    JLabel salesHistoryList;
 
     // Formatted string w/ description and other additional information
     public String detailedSalesInformation(Sales item) {
@@ -90,16 +82,12 @@ public class FarmerGUI implements Runnable{
         listItem = new JButton("List Item to Sell");
         removeItem = new JButton("Remove Listed Item");
         logout = new JButton("Logout");
-        viewPurchaseHistory = new JButton("View Your Purchase History");
-        viewSalesHistory = new JButton("View Your Sales History");
 
         mainPanelTop.add(purchaseItem);
         mainPanelTop.add(listItem);
         mainPanelTop.add(removeItem);
 
         mainPanelBottom.add(logout);
-        mainPanelMiddle.add(viewPurchaseHistory);
-        mainPanelMiddle.add(viewSalesHistory);
 
         mainContent.add(mainPanelTop);
         mainContent.add(mainPanelMiddle);
@@ -180,7 +168,7 @@ public class FarmerGUI implements Runnable{
                                 }
                             } catch (IllegalArgumentException ex) {
                                 JOptionPane.showMessageDialog(salesFilters, "Please enter a valid number for" +
-                                        "your upper bound.\nYour value must be at least as much as your lower bound",
+                                                "your upper bound.\nYour value must be at least as much as your lower bound",
                                         "Filters", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
@@ -190,6 +178,7 @@ public class FarmerGUI implements Runnable{
                         pw.write("requestSalesList");
                         pw.println();
                         pw.flush();
+
                         ArrayList<Sales> itemsList;
                         try {
                             itemsList = (ArrayList<Sales>) ois.readObject();
@@ -236,33 +225,12 @@ public class FarmerGUI implements Runnable{
                             public void itemStateChanged(ItemEvent e) {
                                 if (e.getStateChange() == ItemEvent.SELECTED){
                                     Sales selection = (Sales) items.getSelectedItem();
-                                    if (selection.getUsername().equals(user.getUsername())) {
-                                        JOptionPane.showMessageDialog(salesBrowsingContent, "You cannot " +
-                                                "purchase your own item", "Error", JOptionPane.ERROR_MESSAGE);
-                                        return;
-                                    }
                                     String selectionInfo = detailedSalesInformation(selection);
                                     selectionInfo += "Would you like to purchase this item?";
                                     int choice = JOptionPane.showConfirmDialog(salesBrowsingContent, selectionInfo,
                                             "Purchase", JOptionPane.YES_NO_OPTION);
                                     if (choice == JOptionPane.YES_OPTION) {
-                                        pw.write("buySale");
-                                        pw.println();
-                                        pw.flush();
-
-                                        pw.write(user.getUsername());
-                                        pw.println();
-                                        pw.flush();
-
-                                        try {
-                                            oos.writeObject(selection);
-                                            oos.flush();
-                                            oos.reset();
-                                        } catch (IOException ex) {
-                                            JOptionPane.showMessageDialog(salesBrowsingContent,
-                                                    "There was an issue communicating with the server",
-                                                    "Connection Error", JOptionPane.ERROR_MESSAGE);
-                                        }
+                                        // TODO Server Interaction
                                         JOptionPane.showMessageDialog(mainMenu, "Purchase successful! " +
                                                         "Returning to main menu...", "Purchase",
                                                 JOptionPane.INFORMATION_MESSAGE);
@@ -365,7 +333,6 @@ public class FarmerGUI implements Runnable{
                         try {
                             oos.writeObject(item);
                             oos.flush();
-                            oos.reset();
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, "There was an issue communicating" +
                                     "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
@@ -436,8 +403,6 @@ public class FarmerGUI implements Runnable{
 
                                 try {
                                     oos.writeObject(selection);
-                                    oos.flush();
-                                    oos.reset();
                                 } catch (IOException ex) {
                                     JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
                                             "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
@@ -451,113 +416,6 @@ public class FarmerGUI implements Runnable{
                     }
                 });
                 removeItems.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        mainMenu.setVisible(true);
-                    }
-                });
-            }
-        });
-
-        // Purchase History
-        viewPurchaseHistory.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainMenu.setVisible(false);
-
-                purchaseHistory = new JFrame(user.getUsername() + ": Purchase History");
-                Container purchaseHistoryContent = purchaseHistory.getContentPane();
-                purchaseHistory.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                purchaseHistory.setLocationRelativeTo(mainContent);
-                purchaseHistoryContent.setLayout(new BoxLayout(purchaseHistoryContent, BoxLayout.Y_AXIS));
-
-                JPanel purchaseHistoryPanel = new JPanel();
-                String history = "<html>";
-                pw.write("requestPurchaseHistory");
-                pw.println();
-                pw.flush();
-
-                pw.write(user.getUsername());
-                pw.println();
-                pw.flush();
-
-                ArrayList<Purchase> purchaseList;
-                try {
-                    purchaseList = (ArrayList<Purchase>) ois.readObject();
-                } catch (IOException | ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(purchaseHistoryContent, "There was an issue connecting with" +
-                            "the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
-                    purchaseHistory.dispose();
-                    return;
-                }
-
-                for (Purchase purchase: purchaseList) {
-                    history += String.format("Seller: %s   Item: %s   Price: %.2f<br>", purchase.getUsernameWhoBought(),
-                            purchase.getNameOfItem(), purchase.getPricePaid());
-                }
-                history += "</html>";
-                purchaseHistoryList = new JLabel(history);
-                purchaseHistoryPanel.add(purchaseHistoryList);
-                purchaseHistoryContent.add(purchaseHistoryPanel);
-
-                purchaseHistory.pack();
-                purchaseHistory.setVisible(true);
-
-                purchaseHistory.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosed(WindowEvent e) {
-                        mainMenu.setVisible(true);
-                    }
-                });
-            }
-        });
-
-        // Selling History
-        viewSalesHistory.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainMenu.setVisible(false);
-
-                salesHistory = new JFrame(user.getUsername() + ": Purchase History");
-                Container salesHistoryContent = salesHistory.getContentPane();
-                salesHistory.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                salesHistory.setLocationRelativeTo(mainContent);
-                salesHistoryContent.setLayout(new BoxLayout(salesHistoryContent, BoxLayout.Y_AXIS));
-
-                JPanel salesHistoryPanel = new JPanel();
-
-                pw.write("requestSalesHistory");
-                pw.println();
-                pw.flush();
-
-                pw.write(user.getUsername());
-                pw.println();
-                pw.flush();
-
-                ArrayList<Selling> salesList;
-                try {
-                    salesList = (ArrayList<Selling>) ois.readObject();
-                } catch (IOException | ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(salesHistory, "There was an issue connecting with" +
-                            "the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
-                    salesHistory.dispose();
-                    return;
-                }
-
-                String history = "<html>";
-                for (Selling sale: salesList) {
-                    history += String.format("Seller: %s   Item: %s   Price: %.2f<br>", sale.getSellerUsername(),
-                            sale.getNameOfItem(), sale.getSellingPrice());
-                }
-                history += "</html>";
-                salesHistoryList = new JLabel(history);
-                salesHistoryPanel.add(salesHistoryList);
-                salesHistoryContent.add(salesHistoryPanel);
-
-                salesHistory.pack();
-                salesHistory.setVisible(true);
-
-                salesHistory.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosed(WindowEvent e) {
                         mainMenu.setVisible(true);
