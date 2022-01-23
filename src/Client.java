@@ -47,6 +47,7 @@ public class Client {
 
                     // Receive From Server
                     String message = br.readLine();
+                    System.out.println(message);
                     if (message.equals("accountMade")) {
                         user = new Farmer(name, username, password);
                         JOptionPane.showMessageDialog(null, "Successfully Logged In",
@@ -73,6 +74,7 @@ public class Client {
 
                     // Receive From Server
                     String message = br.readLine();
+                    System.out.println("Message received");
                     if (message.equals("loggedIn")) {
                         user = (Farmer) ois.readObject();
                         JOptionPane.showMessageDialog(null, "Successfully Logged In",
@@ -80,7 +82,7 @@ public class Client {
                         break;
                     } else {
                         JOptionPane.showMessageDialog(null, "An account with the given " +
-                                "credentials was not found.\nPlease try again.", "Login",
+                                        "credentials was not found.\nPlease try again.", "Login",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
@@ -97,6 +99,7 @@ public class Client {
         } catch (IOException | InterruptedException e) {
             JOptionPane.showMessageDialog(null, "There was an issue connecting to the server",
                     "Connection Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
