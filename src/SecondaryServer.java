@@ -64,6 +64,9 @@ public class SecondaryServer implements Runnable {
                         pw.write("accountMade");
                         pw.println();
                         pw.flush();
+
+                        oos.writeObject(newFarmer);
+                        oos.flush();
                     } else {  //username already taken
                         pw.write("accountNotMade");
                         pw.println();
@@ -86,6 +89,27 @@ public class SecondaryServer implements Runnable {
                         pw.println();
                         pw.flush();
                     }
+                } else if (action.equals("postingSellOffer")) {
+                    Sales theSale = (Sales) ois.readObject();
+                    ArrayList<Sales> theSalesList = getSalesList();
+                    theSalesList.add(theSale);
+                    updateSalesList(theSalesList);
+
+                } else if (action.equals("requestSalesList")) {
+                    ArrayList<Sales> theSalesList = getSalesList();
+                    oos.writeObject(theSalesList);
+                    oos.flush(); 
+
+                } else if (action.equals("requestUserSalesList")) {
+                    String username = bfr.readLine();
+                    ArrayList<Sales> specificUserSales = new ArrayList<>();
+                    for (Sales s: getSalesList()) {
+                        if (s.getUsername().equals(username)) {
+                            specificUserSales.add(s);
+                        }
+                    }
+                    oos.writeObject(specificUserSales);
+                    oos.flush();
                 }
 
             } catch (Exception e) {
@@ -129,5 +153,22 @@ public class SecondaryServer implements Runnable {
             }
         }
         return null;
+    }
+
+    public static ArrayList<Sales> getSalesList() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Sales.txt"))) {
+            Object o = ois.readObject();
+            return (ArrayList<Sales>) o;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static void updateSalesList(ArrayList<Sales> salesList) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Sales.txt"))) {
+            oos.writeObject(salesList);
+        } catch (Exception e) {
+
+        }
     }
 }
