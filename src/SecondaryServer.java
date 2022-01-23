@@ -68,6 +68,8 @@ public class SecondaryServer implements Runnable {
 
                         oos.writeObject(newFarmer);
                         oos.flush();
+                        oos.reset();
+
                     } else {  //username already taken
                         pw.write("accountNotMade");
                         pw.println();
@@ -85,6 +87,8 @@ public class SecondaryServer implements Runnable {
 
                         oos.writeObject(loggedIn(username, password));
                         oos.flush();
+                        oos.reset();
+
                     } else {
                         pw.write("cantLogin");
                         pw.println();
@@ -100,6 +104,8 @@ public class SecondaryServer implements Runnable {
                     ArrayList<Sales> theSalesList = getSalesList();
                     oos.writeObject(theSalesList);
                     oos.flush();
+                    oos.reset();
+
 
                 } else if (action.equals("requestUserSalesList")) {
                     String username = bfr.readLine();
@@ -111,6 +117,8 @@ public class SecondaryServer implements Runnable {
                     }
                     oos.writeObject(specificUserSales);
                     oos.flush();
+                    oos.reset();
+
                 } else if (action.equals("removeSale")) {
                     Sales saleToRemove = (Sales) ois.readObject();
                     ArrayList<Sales> salesList = getSalesList();
@@ -123,6 +131,7 @@ public class SecondaryServer implements Runnable {
                         }
                     }
                 } else if (action.equals("buySale")) {
+                    String buyerUsername = bfr.readLine();
                     Sales soldObject = (Sales) ois.readObject();
                     ArrayList<Sales> saleList = getSalesList();
                     for (int i = 0; i < saleList.size(); i++) {
@@ -132,6 +141,45 @@ public class SecondaryServer implements Runnable {
                             break;
                         }
                     }
+                    /*
+                     * Making a purchase history and selling history object
+                     */
+                    Purchase newPurchase = new Purchase(buyerUsername, soldObject.getName(), soldObject.getPrice());
+                    ArrayList<Purchase> purchaseList = getPurchaseHistory();
+                    purchaseList.add(newPurchase);
+                    updatePurchaseHistory(purchaseList);
+
+                    Selling newSell = new Selling(soldObject.getUsername(), soldObject.getName(), soldObject.getPrice());
+                    ArrayList<Selling> sellingList = getSellingHistory();
+                    sellingList.add(newSell);
+                    updateSellingHistory(sellingList);
+
+                } else if (action.equals("requestPurchaseHistory")) {
+                    String userLoggedIn = bfr.readLine();
+                    ArrayList<Purchase> userSpecificPurchaseList = new ArrayList<>();
+                    for (Purchase p: getPurchaseHistory()) {
+                        if (p.getUsernameWhoBought().equals(userLoggedIn)) {
+                            userSpecificPurchaseList.add(p);
+                        }
+                    }
+
+                    oos.writeObject(userSpecificPurchaseList);
+                    oos.flush();
+                    oos.reset();
+
+                } else if (action.equals("requestSellingHistory")) {
+                    String userLoggedIn = bfr.readLine();
+                    ArrayList<Selling> userSpecificSellingList = new ArrayList<>();
+                    for (Selling s: getSellingHistory()) {
+                        if (s.getSellerUsername().equals(userLoggedIn)) {
+                            userSpecificSellingList.add(s);
+                        }
+                    }
+
+                    oos.writeObject(userSpecificSellingList);
+                    oos.flush();
+                    oos.reset();
+
                 }
 
             } catch (Exception e) {
@@ -193,4 +241,40 @@ public class SecondaryServer implements Runnable {
 
         }
     }
+
+    public static ArrayList<Purchase> getPurchaseHistory() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("PurchaseHistory.txt"))) {
+            Object o = ois.readObject();
+            return (ArrayList<Purchase>) o;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static void updatePurchaseHistory(ArrayList<Purchase> purchaseList) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("PurchaseHistory.txt"))) {
+            oos.writeObject(purchaseList);
+        } catch (Exception e) {
+
+        }
+    }
+
+    public static ArrayList<Selling> getSellingHistory() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("SellingHistory.txt"))) {
+            Object o = ois.readObject();
+            return (ArrayList<Selling>) o;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static void updateSellingHistory(ArrayList<Selling> sellingList) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("SellingHistory.txt"))) {
+            oos.writeObject(sellingList);
+        } catch (Exception e) {
+
+        }
+    }
+
+
 }
