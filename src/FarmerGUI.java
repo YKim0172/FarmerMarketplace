@@ -473,7 +473,28 @@ public class FarmerGUI implements Runnable{
 
                 JPanel purchaseHistoryPanel = new JPanel();
                 String history = "<html>";
-                // TODO Communicate w/ server, loop to get all info
+                pw.write("requestPurchaseHistory");
+                pw.println();
+                pw.flush();
+
+                pw.write(user.getUsername());
+                pw.println();
+                pw.flush();
+
+                ArrayList<Purchase> purchaseList;
+                try {
+                    purchaseList = (ArrayList<Purchase>) ois.readObject();
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(purchaseHistoryContent, "There was an issue connecting with" +
+                            "the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    purchaseHistory.dispose();
+                    return;
+                }
+
+                for (Purchase purchase: purchaseList) {
+                    history += String.format("Seller: %s   Item: %s   Price: %.2f<br>", purchase.getUsernameWhoBought(),
+                            purchase.getNameOfItem(), purchase.getPricePaid());
+                }
                 history += "</html>";
                 purchaseHistoryList = new JLabel(history);
                 purchaseHistoryPanel.add(purchaseHistoryList);
@@ -504,11 +525,33 @@ public class FarmerGUI implements Runnable{
                 salesHistoryContent.setLayout(new BoxLayout(salesHistoryContent, BoxLayout.Y_AXIS));
 
                 JPanel salesHistoryPanel = new JPanel();
+
+                pw.write("requestSalesHistory");
+                pw.println();
+                pw.flush();
+
+                pw.write(user.getUsername());
+                pw.println();
+                pw.flush();
+
+                ArrayList<Selling> salesList;
+                try {
+                    salesList = (ArrayList<Selling>) ois.readObject();
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(salesHistory, "There was an issue connecting with" +
+                            "the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    salesHistory.dispose();
+                    return;
+                }
+
                 String history = "<html>";
-                // TODO Communicate w/ server, loop to get all info
+                for (Selling sale: salesList) {
+                    history += String.format("Seller: %s   Item: %s   Price: %.2f<br>", sale.getSellerUsername(),
+                            sale.getNameOfItem(), sale.getSellingPrice());
+                }
                 history += "</html>";
                 salesHistoryList = new JLabel(history);
-                salesHistoryPanel.add(purchaseHistoryList);
+                salesHistoryPanel.add(salesHistoryList);
                 salesHistoryContent.add(salesHistoryPanel);
 
                 salesHistory.pack();
