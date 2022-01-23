@@ -190,7 +190,6 @@ public class FarmerGUI implements Runnable{
                         pw.write("requestSalesList");
                         pw.println();
                         pw.flush();
-
                         ArrayList<Sales> itemsList;
                         try {
                             itemsList = (ArrayList<Sales>) ois.readObject();
@@ -251,9 +250,14 @@ public class FarmerGUI implements Runnable{
                                         pw.println();
                                         pw.flush();
 
+                                        pw.write(user.getUsername());
+                                        pw.println();
+                                        pw.flush();
+
                                         try {
                                             oos.writeObject(selection);
                                             oos.flush();
+                                            oos.reset();
                                         } catch (IOException ex) {
                                             JOptionPane.showMessageDialog(salesBrowsingContent,
                                                     "There was an issue communicating with the server",
@@ -361,6 +365,7 @@ public class FarmerGUI implements Runnable{
                         try {
                             oos.writeObject(item);
                             oos.flush();
+                            oos.reset();
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, "There was an issue communicating" +
                                     "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
@@ -432,6 +437,7 @@ public class FarmerGUI implements Runnable{
                                 try {
                                     oos.writeObject(selection);
                                     oos.flush();
+                                    oos.reset();
                                 } catch (IOException ex) {
                                     JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
                                             "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
