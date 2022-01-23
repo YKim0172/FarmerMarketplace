@@ -219,6 +219,7 @@ public class FarmerGUI implements Runnable{
                         salesBrowsingContent.add(itemsPanel);
 
                         salesBrowsing.setVisible(true);
+                        mainMenu.setVisible(false);
 
                         items.addItemListener(new ItemListener() {
                             @Override
