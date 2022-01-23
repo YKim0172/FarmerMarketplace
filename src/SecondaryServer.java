@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.net.*;
 import java.util.*;
 import java.lang.*;
@@ -118,6 +119,16 @@ public class SecondaryServer implements Runnable {
                         if (current.equals(saleToRemove)) {
                             salesList.remove(i);
                             updateSalesList(salesList);
+                            break;
+                        }
+                    }
+                } else if (action.equals("buySale")) {
+                    Sales soldObject = (Sales) ois.readObject();
+                    ArrayList<Sales> saleList = getSalesList();
+                    for (int i = 0; i < saleList.size(); i++) {
+                        if (soldObject.equals(saleList)) {
+                            saleList.remove(i);
+                            updateSalesList(saleList);
                             break;
                         }
                     }
