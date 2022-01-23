@@ -237,12 +237,28 @@ public class FarmerGUI implements Runnable{
                             public void itemStateChanged(ItemEvent e) {
                                 if (e.getStateChange() == ItemEvent.SELECTED){
                                     Sales selection = (Sales) items.getSelectedItem();
+                                    if (selection.getUsername().equals(user.getUsername())) {
+                                        JOptionPane.showMessageDialog(salesBrowsingContent, "You cannot " +
+                                                "purchase your own item", "Error", JOptionPane.ERROR_MESSAGE);
+                                        return;
+                                    }
                                     String selectionInfo = detailedSalesInformation(selection);
                                     selectionInfo += "Would you like to purchase this item?";
                                     int choice = JOptionPane.showConfirmDialog(salesBrowsingContent, selectionInfo,
                                             "Purchase", JOptionPane.YES_NO_OPTION);
                                     if (choice == JOptionPane.YES_OPTION) {
-                                        // TODO Server Interaction
+                                        pw.write("buySale");
+                                        pw.println();
+                                        pw.flush();
+
+                                        try {
+                                            oos.writeObject(selection);
+                                            oos.flush();
+                                        } catch (IOException ex) {
+                                            JOptionPane.showMessageDialog(salesBrowsingContent,
+                                                    "There was an issue communicating with the server",
+                                                    "Connection Error", JOptionPane.ERROR_MESSAGE);
+                                        }
                                         JOptionPane.showMessageDialog(mainMenu, "Purchase successful! " +
                                                         "Returning to main menu...", "Purchase",
                                                 JOptionPane.INFORMATION_MESSAGE);
@@ -415,6 +431,7 @@ public class FarmerGUI implements Runnable{
 
                                 try {
                                     oos.writeObject(selection);
+                                    oos.flush();
                                 } catch (IOException ex) {
                                     JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
                                             "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
