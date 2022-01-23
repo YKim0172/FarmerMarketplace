@@ -98,7 +98,7 @@ public class SecondaryServer implements Runnable {
                 } else if (action.equals("requestSalesList")) {
                     ArrayList<Sales> theSalesList = getSalesList();
                     oos.writeObject(theSalesList);
-                    oos.flush(); 
+                    oos.flush();
 
                 } else if (action.equals("requestUserSalesList")) {
                     String username = bfr.readLine();
@@ -110,6 +110,17 @@ public class SecondaryServer implements Runnable {
                     }
                     oos.writeObject(specificUserSales);
                     oos.flush();
+                } else if (action.equals("removeSale")) {
+                    Sales saleToRemove = (Sales) ois.readObject();
+                    ArrayList<Sales> salesList = getSalesList();
+                    for (int i = 0; i < salesList.size(); i++) {
+                        Sales current = salesList.get(i);
+                        if (current.equals(saleToRemove)) {
+                            salesList.remove(i);
+                            updateSalesList(salesList);
+                            break;
+                        }
+                    }
                 }
 
             } catch (Exception e) {
