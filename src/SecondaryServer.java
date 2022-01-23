@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.net.*;
 import java.util.*;
 import java.lang.*;
@@ -49,7 +48,10 @@ public class SecondaryServer implements Runnable {
     public void run() {
         while (true) {
             try {
+                //System.out.println("ACCEPTING INPUT FROM CLIENT");
                 String action = bfr.readLine();
+                Thread.sleep(500);
+                System.out.println(action);
 
                 if (action.equals("createAccount")) {
                     String name = bfr.readLine();
@@ -95,6 +97,7 @@ public class SecondaryServer implements Runnable {
                         pw.flush();
                     }
                 } else if (action.equals("postingSellOffer")) {
+                    Thread.sleep(500);
                     Sales theSale = (Sales) ois.readObject();
                     ArrayList<Sales> theSalesList = getSalesList();
                     theSalesList.add(theSale);
@@ -141,50 +144,13 @@ public class SecondaryServer implements Runnable {
                             break;
                         }
                     }
-                    /*
-                     * Making a purchase history and selling history object
-                     */
-                    Purchase newPurchase = new Purchase(buyerUsername, soldObject.getName(), soldObject.getPrice());
-                    ArrayList<Purchase> purchaseList = getPurchaseHistory();
-                    purchaseList.add(newPurchase);
-                    updatePurchaseHistory(purchaseList);
-
-                    Selling newSell = new Selling(soldObject.getUsername(), soldObject.getName(), soldObject.getPrice());
-                    ArrayList<Selling> sellingList = getSellingHistory();
-                    sellingList.add(newSell);
-                    updateSellingHistory(sellingList);
-
-                } else if (action.equals("requestPurchaseHistory")) {
-                    String userLoggedIn = bfr.readLine();
-                    ArrayList<Purchase> userSpecificPurchaseList = new ArrayList<>();
-                    for (Purchase p: getPurchaseHistory()) {
-                        if (p.getUsernameWhoBought().equals(userLoggedIn)) {
-                            userSpecificPurchaseList.add(p);
-                        }
-                    }
-
-                    oos.writeObject(userSpecificPurchaseList);
-                    oos.flush();
-                    oos.reset();
-
-                } else if (action.equals("requestSellingHistory")) {
-                    String userLoggedIn = bfr.readLine();
-                    ArrayList<Selling> userSpecificSellingList = new ArrayList<>();
-                    for (Selling s: getSellingHistory()) {
-                        if (s.getSellerUsername().equals(userLoggedIn)) {
-                            userSpecificSellingList.add(s);
-                        }
-                    }
-
-                    oos.writeObject(userSpecificSellingList);
-                    oos.flush();
-                    oos.reset();
 
                 }
 
             } catch (Exception e) {
 
             }
+            System.out.println("REACHED THE BOTTOM OF THE LOOP");
 
         }
     }
@@ -241,40 +207,4 @@ public class SecondaryServer implements Runnable {
 
         }
     }
-
-    public static ArrayList<Purchase> getPurchaseHistory() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("PurchaseHistory.txt"))) {
-            Object o = ois.readObject();
-            return (ArrayList<Purchase>) o;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public static void updatePurchaseHistory(ArrayList<Purchase> purchaseList) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("PurchaseHistory.txt"))) {
-            oos.writeObject(purchaseList);
-        } catch (Exception e) {
-
-        }
-    }
-
-    public static ArrayList<Selling> getSellingHistory() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("SellingHistory.txt"))) {
-            Object o = ois.readObject();
-            return (ArrayList<Selling>) o;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public static void updateSellingHistory(ArrayList<Selling> sellingList) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("SellingHistory.txt"))) {
-            oos.writeObject(sellingList);
-        } catch (Exception e) {
-
-        }
-    }
-
-
 }
