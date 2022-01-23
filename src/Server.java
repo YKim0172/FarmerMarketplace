@@ -56,6 +56,17 @@ public class Server {
             }
         }
 
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Sales.txt"))) {
+        } catch (Exception a) {
+            ArrayList<Selling> salesArrayList = new ArrayList<>();
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Sales.txt"))) {
+                oos.writeObject(salesArrayList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
 
         while (true) {
             System.out.println("accepting input");
