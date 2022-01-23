@@ -360,7 +360,26 @@ public class FarmerGUI implements Runnable{
                 JPanel items = new JPanel();
                 accountItems = new JComboBox<>();
                 accountItems.setMaximumRowCount(15);
-                // TODO Communicate w/ server, loop to add to combobox
+
+                pw.write("requestUserSalesList");
+                pw.println();
+                pw.flush();
+                pw.write(user.getUsername());
+                pw.println();
+                pw.flush();
+
+                ArrayList<Sales> userItems;
+                try {
+                    userItems = (ArrayList<Sales>) ois.readObject();
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
+                            "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    mainMenu.setVisible(true);
+                    return;
+                }
+                for (Sales userList: userItems) {
+                    accountItems.addItem(userList);
+                }
                 items.add(accountItems);
                 removeItemsContent.add(items);
                 removeItems.setVisible(true);
@@ -374,7 +393,17 @@ public class FarmerGUI implements Runnable{
                         int choice = JOptionPane.showConfirmDialog(removeItemsContent, selectioninfo, "Remove Item",
                                 JOptionPane.YES_NO_OPTION);
                         if (choice == JOptionPane.YES_OPTION) {
-                            // TODO Server Interaction
+                            pw.write("removeSale");
+                            pw.println();
+                            pw.flush();
+
+                            try {
+                                oos.writeObject(selection);
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(removeItems, "There was an issue communicating" +
+                                        "with the server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
                             JOptionPane.showMessageDialog(removeItemsContent, "Item has successfully " +
                                     "been removed", "Success", JOptionPane.INFORMATION_MESSAGE);
                             removeItems.dispose();

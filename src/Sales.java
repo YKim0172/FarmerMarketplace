@@ -59,4 +59,18 @@ public class Sales implements Serializable {
         }
         return result;
     }
+
+    public boolean equals(Object o) {
+        if (o instanceof Sales) {
+            Sales s = (Sales) o;
+            if (this.price == s.getPrice() && this.name.equals(s.getName())) {
+                if (this.description.equals(s.getDescription())) {
+                    if (this.username.equals(s.getUsername())) {
+                        return this.type == s.getType();
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
